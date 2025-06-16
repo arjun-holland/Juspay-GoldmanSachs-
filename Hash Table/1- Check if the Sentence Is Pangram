@@ -1,0 +1,21 @@
+/*
+A pangram is a sentence where every letter of the English alphabet appears at least once.
+Given a string sentence containing only lowercase English letters, return true if sentence is a pangram, or false otherwise.
+
+Input: sentence = "thequickbrownfoxjumpsoverthelazydog"
+Output: true
+Explanation: sentence contains at least one of every letter of the English alphabet.
+*/
+
+class Solution {
+public:
+    bool checkIfPangram(string sentence) {
+         unordered_set<char> letters;
+        
+        for (char ch : sentence) {
+            letters.insert(ch);
+        }
+
+        return letters.size() == 26;
+    }
+};
