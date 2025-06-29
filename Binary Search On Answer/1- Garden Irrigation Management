@@ -1,0 +1,117 @@
+/*
+You are in charge of a large garden with various irrigation sprinklers arranged across different sections. The garden has a water requirement, measured in units of water supply, that you need to meet to keep the plants healthy.
+
+You have n sprinklers in the garden. Each sprinkler i can provide w_i units of water before it needs to be refilled. The refill process takes r_i days to complete, during which the sprinkler cannot supply water, meaning the next time you can use this sprinkler is day x + r_i, if your current day is x.
+
+On each day, you can use all sprinklers that are not currently being refilled. If all sprinklers are being refilled on a given day, no water is supplied to the garden for that day.
+
+Initially, all sprinklers are filled and ready to use.
+Your task is to calculate the minimum number of days required to meet or exceed the garden’s water requirement.
+
+Function description
+Complete the solve function in the editor below. It has the following parameter(s):
+| Name | Type          | Description                                                        |
+| ---- | ------------- | ------------------------------------------------------------------ |
+| `w`  | INTEGER       | Total water requirement                                            |
+| `n`  | INTEGER       | Number of sprinklers in the garden                                 |
+| `w`  | INTEGER ARRAY | Amount of water each sprinkler can provide before needing a refill |
+
+*/
+
+//BRUTE FORCE - O(n^2)
+#include <bits/stdc++.h>
+using namespace std;
+int solve(int g,vector<int>& w,vector<int>& r){
+    int n = w.size();
+    vector<pair<int,int>> vt(n);
+    for(int i=0;i<n;i++){
+        vt[i] = make_pair(1,w[i]);  //on first day we can use every tap
+    }
+    int day = 1,curSum = 0;
+    while(true){
+        int t = 0;
+        for(int i=0;i<n;i++){
+            if(day == vt[i].first){
+                curSum += vt[i].second;
+                vt[i].first = vt[i].first + r[i];  //modify the refill time
+            }
+            if(curSum >= g){
+                t = 1;
+                break;
+            }
+        }
+        if(t)break;
+        day++;
+    }
+    return day;
+}
+
+int main() {
+	int g  //total water units needed
+	cin>>g;
+	int n;  //no.of sprinkles
+	cin>>n;
+	vector<int> w(n),r(n);
+	for(int i=0;i<n;i++)cin>>w[i];  //capacity of sprinkles
+  for(int i=0;i<n;i++)cin>>r[i];  //refill time of sprinkles
+  cout << solve(g,w,r);
+}
+
+
+//OPTIMAL WAY - O(n log n)
+#include <bits/stdc++.h>
+using namespace std;
+
+// Checks if it's possible to meet or exceed the water goal `g` in `rd` days
+bool valid(int rd, int g, vector<int>& w, vector<int>& r) {
+    long long total = 0;
+    
+    for (int i = 0; i < w.size(); i++) {     // Iterate through all sprinklers
+        // Each sprinkler is used on: Day 1, 1 + r[i], 1 + 2*r[i], ...,These form an arithmetic progression (AP)
+        // Formula to calculate number of uses(n) upto 'rd'th day within refill days from 'a=1':  rd=a+(n-1)*d , n = ((rd - 1) / r[i]) + 1
+        int uses = ((rd - 1) / r[i]) + 1;
+
+        // Total water contributed by this sprinkler
+        total += 1LL * uses * w[i];
+
+        // Early exit if goal is already met
+        if (total >= g) return true;
+    }
+
+    // Return whether total water collected is enough
+    return total >= g;
+}
+
+// Binary search to find the minimum number of days required
+int solve(int g, vector<int>& w, vector<int>& r) {
+    int low = 1, high = 1e9 + 7; // Search space for days
+    int ans = high; // Store minimum valid answer
+    
+    while (low <= high) {
+        int mid = (low + high) / 2;
+
+        // If it's possible to satisfy the goal in `mid` days
+        if (valid(mid, g, w, r)) {
+            ans = mid;      // Update answer
+            high = mid - 1; // Try to find a smaller valid day
+        } else {
+            low = mid + 1;  // Increase day count to meet the goal
+        }
+    }
+
+    return ans;
+}
+
+int main() {
+    int g; // Water goal
+    cin >> g;
+    int n; // Number of sprinklers
+    cin >> n;
+    vector<int> w(n), r(n);
+    for (int i = 0; i < n; i++) cin >> w[i];   // Input water capacity for each sprinkler
+    for (int i = 0; i < n; i++) cin >> r[i];   // Input refill time for each sprinkler
+
+    // Compute and print minimum number of days required
+    cout << solve(g, w, r);
+}
+
