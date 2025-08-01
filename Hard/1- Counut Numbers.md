@@ -48,7 +48,7 @@ int count(int pos, int digit) {
 
 int user_logic(int n) {
     N = n;
-    dp.assign(N + 1, vector<int>(10, -1)); // initialize dp[pos][digit] = -1
+    dp.assign(N, vector<int>(10, -1)); // initialize dp[pos][digit] = -1
 
     int total = 0;
     for (int d = 1; d <= 9; ++d) {
